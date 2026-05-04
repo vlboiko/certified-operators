@@ -61,6 +61,8 @@ fbc-onboarding: clean
 catalogs: render_catalogs.sh ${BINDIR}/opm ${BINDIR}/yq clean
 	@echo "Rendering catalogs from templates"
 	@${BINDIR}/render_catalogs.sh
+	@find ${TOPDIR}/catalogs -type d -name ${OPERATOR_NAME} -exec \
+		${BINDIR}/yq ea -i 'select(fi == 1) as $$icon | select(.schema == "olm.package").icon = $$icon | select(fi == 0)' {}/catalog.yaml catalog-templates/icon.yaml \;
 
 
 # validate-catalogs target illustrates FBC validation
@@ -84,7 +86,7 @@ OS=$(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(shell uname -m | sed 's/x86_64/amd64/')
 
 # Automatically download the binaries and scripts and place them in the bin directory
-OPM_VERSION ?= v1.46.0
+OPM_VERSION ?= v1.61.0
 ${BINDIR}/opm:
 	if [ ! -d ${BINDIR} ]; then mkdir -p ${BINDIR}; fi
 	curl -sLO https://github.com/operator-framework/operator-registry/releases/download/$(OPM_VERSION)/$(OS)-$(ARCH)-opm && chmod +x $(OS)-$(ARCH)-opm && mv $(OS)-$(ARCH)-opm ${BINDIR}/opm
